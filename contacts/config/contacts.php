@@ -15,7 +15,7 @@
  *
  * @package    Contacts
  * @author     Pedro Ruiz hidalgo
- * @link       http://github.com/PedroRuiz/CodeIgniter-Contacts
+ * @link       http://github.com/PedroRuiz/contacts
  * @filesource
  */
 defined('BASEPATH') OR exit('No direct script access allowed');
