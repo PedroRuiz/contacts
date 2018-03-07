@@ -1,99 +1,131 @@
-<?php
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
- * Name:    Contacts Model
- * Author:  Pedro Ruiz Hidalgo
- *           correo@pedroruizhidalgo.es
- *           @pedroruizhidalg
- *
- *
- * Created:  2018-01-31
- *
- * Description:  This is the configuration file for the third_party contacts project
- * Original Author name has been kept but that does not mean that the method has not been modified.
- *
- * Requirements: PHP5 or above
- *
- * @package    CodeIgniter-Contacts
- * @author     Pedro Ruiz Hidalgo
- * @link       http://github.com/PedroRuiz/contacts
- * @filesource
- */
-defined('BASEPATH') OR exit('No direct script access allowed');
-
-/**
- * Class Contacts Model
- *
- * @property contacts Library
- */
+* Name:
+*
+* Version:
+*
+* @author Pedro Ruiz Hidalgo
+*		  ruizhidalgopedro [at] @gmail [dot] com
+*         @pedroruizhidalg
+*
+*		  Coding the world since 1983!
+*
+* Location:
+*
+* Created:  2016.01.01
+* (yyyy-mm-dd)
+*
+* Description:
+*
+* Requirements: PHP7 or above
+* @package contacts
+* @property config/contacts.php
+*/
 class Contacts_model extends CI_Model
 {
+    private $tablename;
+
     /**
-	 * table
-	 *
-	 * @var string
-	 **/
-	private $table;
-    
+    * @param none
+    * @return none
+    **/
     function __construct()
     {
-        
-        $this->config->load('contacts', TRUE);
-        
-        $this->table = $this->config->item('cntcts_tablename');
+        parent::__construct();
+        $this->load->add_package_path( APPPATH . 'contacts' );
+        $this->config->load('contacts');
+        $this->tablename = $this->config->item('cntcts_tablename');
     }
-    
-    function read_contacts()
+
+    /**
+    * @param none
+    * @return int count contacts
+    **/
+    function count()
     {
-        return $this->db->get($this->table)->result_array();
+        return $this->db->count_all_results($this->tablename);
     }
-    
+
+    /**
+    * @param none
+    * @return int count contacts
+    **/
+    function count_week()
+    {
+        return count($this->db
+                    ->select('id')
+                    ->from($this->tablename)
+                    ->where( 'date_creation >=' , date( 'Y-m-d' , strtotime( '-7 days' ) ) )
+
+                    ->get()->result_array()
+                     );
+    }
+
+    /**
+    * @param array $post
+    * @return bool success insert
+    **/
+    function new_contact($array)
+    {
+        if( is_array( $array ) )
+        {
+            return $this->db->insert( $this->tablename , $array );
+        }
+    }
+
+    /**
+    * @param void
+    * @return array result
+    **/
+    function get_all()
+    {
+        return $this->db->order_by('shown_name')->get($this->tablename)->result_array();
+    }
+
+    /**
+    * @param int id_user
+    * @param string image
+    * @return bool
+    **/
+    function update_image( $id_user , $image )
+    {
+        return $this->db
+                    ->set( 'image' , $image )
+                    ->where( 'id' , $id_user )
+                    ->update( $this->tablename );
+    }
+
+    /**
+    * @param int id, $id_user
+    * @return array result_array
+    **/
     function get_contact($id)
     {
-        return $this->db->where('id',$id)->get($this->table)->row_array();
+        return $this->db->where( 'id' , $id )->get($this->tablename)->row_array();
     }
-    
-    function update($data)
-    {
-        if(!is_array($data)) show_error('data must be an array');
-        //var_dump($data); exit;
-		extract($data);
-		
-		// for security reasons I prefer this over replace
-        
-		$this->db->set('first_name',$first_name);
-		$this->db->set('last_name',$last_name);
-		$this->db->set('shown_name',$shown_name);
-		$this->db->set('nick_name',$nick_name);
-		$this->db->set('first_email',$first_email);
-		$this->db->set('first_name',$first_name);
-		$this->db->set('second_email',$second_email);
-		$this->db->set('chat_nick',$chat_nick);
-		$this->db->set('mobile',$mobile);
-		$this->db->set('work_phone',$work_phone);
-		$this->db->set('home_phone',$home_phone);
-		$this->db->set('fax',$fax);
-		$this->db->set('pager',$pager);
-		
-		$this->db->where('id',$id);
-		return $this->db->update($this->table);
-    }
-    
-    function delete($id)
-    {
-        return $this->db->delete($this->table,array('id',$id));
-    }
-    
-    function insert($data)
-    {
 
-        if(!is_array($data)) show_error('data must be an array');
-        
-        return $this->db->insert($this->table,$data);
+    /**
+    * @param array input->post()
+    * @return bool
+    **/
+    function update_contact($array)
+    {
+        $_id    =   $array['id'];
+        return $this->db->where( 'id' , $_id )->update( $this->tablename , $array );
     }
-	
-	function write_user_image($image,$id)
-	{ 
-		$this->db->set('image',$image)->where('id',$id)->update($this->table);
-	}
-    
+
+    /**
+    * @param int id, id user
+    * @return bool
+    **/
+    function delete_contact($id)
+    {
+        return $this->db->where( 'id' , $id )->delete( $this->tablename );
+    }
 }
+
+
+
+/** this ends this file
+*
+*/
